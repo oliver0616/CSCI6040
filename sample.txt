@@ -1,1 +1,0 @@
-<s> This is a test </s><s> This should extract things </s>

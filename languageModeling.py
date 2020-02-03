@@ -2,48 +2,33 @@
 #Chase Moore
 #Jared Mello
 
+import os
 import re
 import string
+import nltk
+from nltk.tokenize import sent_tokenize
 import pickle
-from bs4 import BeautifulSoup
 
-def preprocessing(fName, n):
-    text = getText('austen-emma.txt')
-    text = removePunctuation(text)
-    text = tagSentenceAndNormalize(text)
-    #segmentSentence(text)
-    print(text)
+#Lower case everything, remove punctuation, sentence segmentation
+def preprocessing(corpus):
+    sentencesList = sent_tokenize(corpus)
+    
+    cleanCorpus = []
+    for eachSent in sentencesList:
+        textNoP = eachSent.translate(str.maketrans("", "", string.punctuation))
+        textNoN = re.sub(r'(\n+)',' ',textNoP)
+        lowerText = textNoN.lower()
+        cleanCorpus.append(lowerText)
+    return cleanCorpus
 
-
-    # normalizedText = normalize(text)
-
-
-   # return ngrams(text, n)
-
-def segmentSentence(text):
-    soup = BeautifulSoup(text)
-    for sentences in soup.find_all('s'):
-        print(sentences)
-
-
-
-def removePunctuation(text):
-    text = text.translate(str.maketrans("", "", string.punctuation))
-    return text
-
-
-def tagSentenceAndNormalize(text):
-        text = re.sub('  ', '</s><s>', text)
-        text = text.lower()
-        return text
-
-
+#get the raw text from the file
 def getText(filename):
     file = open(filename, 'rt')
     text = file.read()
     file.close()
     return text
 
+#ngrams function
 def ngrams(input, n):
     input = input.split(' ')
     output = {}
@@ -66,4 +51,29 @@ def ngrams(input, n):
 #   print s
 #   print [ord(c) for c in s]
 
-preprocessing('big.txt', 2)
+#====================================================================================================
+#Main
+cwd = os.getcwd()
+inputDir = os.path.join(cwd,"_input")
+pickleDir = os.path.join(cwd,"_pickleFiles")
+#Load all corpus
+listOfInputName = os.listdir(inputDir)
+allCorpus = []
+
+for eachFile in listOfInputName:
+    currentInputPath = os.path.join(inputDir,eachFile)
+    currentInputText = getText(currentInputPath)
+    currentSentences = preprocessing(currentInputText)
+    allCorpus.append(currentSentences)
+corpusPicklePath = os.path.join(pickleDir, "corpus.pickle")
+corpusPickleFile = open(corpusPicklePath,"wb")
+pickle.dump(allCorpus, corpusPickleFile)
+
+testString = "this is a sentence"
+temp = ngrams(testString,2)
+print(temp)
+
+
+#readTemp = open(corpusPicklePath, "rb")
+#tempCorpus = pickle.load(readTemp)
+#print(tempCorpus)
