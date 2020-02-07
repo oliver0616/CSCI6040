@@ -9,10 +9,10 @@ import nltk
 from nltk.tokenize import sent_tokenize
 import pickle
 
+
 #Lower case everything, remove punctuation, sentence segmentation
 def preprocessing(corpus):
     sentencesList = sent_tokenize(corpus)
-    
     cleanCorpus = []
     for eachSent in sentencesList:
         textNoP = eachSent.translate(str.maketrans("", "", string.punctuation))
@@ -20,6 +20,7 @@ def preprocessing(corpus):
         lowerText = textNoN.lower()
         cleanCorpus.append(lowerText)
     return cleanCorpus
+
 
 #get the raw text from the file
 def getText(filename):
@@ -38,6 +39,57 @@ def ngrams(input, n):
         output[g] += 1
     return output
 
+#writes bigram, trigram and quadgram files to the directory
+def writeNGrams(corpus):
+    i = 2
+    #gets ngrams for austen-emma
+    while i < 5:
+        file = open(str(i) + "gram.txt", "wt")
+        temp = str(ngrams(str(corpus[0]), i))
+        file.write(temp)
+        file.close()
+        i += 1
+
+
+#====================================================================================================
+#Main
+cwd = os.getcwd()
+inputDir = os.path.join(cwd,"_input")
+pickleDir = os.path.join(cwd,"_pickleFiles")
+#Load all corpus
+listOfInputName = os.listdir(inputDir)
+allCorpus = []
+
+#append the normalized sentences to a list
+for eachFile in listOfInputName:
+    currentInputPath = os.path.join(inputDir,eachFile)
+    currentInputText = getText(currentInputPath)
+    currentSentences = preprocessing(currentInputText)
+    allCorpus.append(currentSentences)
+
+
+#Serializing corpus
+corpusPicklePath = os.path.join(pickleDir, "corpus.pickle")
+corpusPickleFile = open(corpusPicklePath,"wb")
+pickle.dump(allCorpus, corpusPickleFile)
+corpusPickleFile.close()
+
+#Deserializing corpus
+readTemp = open(corpusPicklePath, "rb")
+tempCorpus = pickle.load(readTemp)
+readTemp.close()
+
+
+print(writeNGrams(tempCorpus))
+
+# testString = "this is a sentence"
+# temp = ngrams(testString,2)
+# print(temp)
+
+
+############# graveyard #####################
+
+
 # def g():
 #   global big
 #   big = file('big.txt').read()
@@ -50,30 +102,3 @@ def ngrams(input, n):
 #         s.add(c)
 #   print s
 #   print [ord(c) for c in s]
-
-#====================================================================================================
-#Main
-cwd = os.getcwd()
-inputDir = os.path.join(cwd,"_input")
-pickleDir = os.path.join(cwd,"_pickleFiles")
-#Load all corpus
-listOfInputName = os.listdir(inputDir)
-allCorpus = []
-
-for eachFile in listOfInputName:
-    currentInputPath = os.path.join(inputDir,eachFile)
-    currentInputText = getText(currentInputPath)
-    currentSentences = preprocessing(currentInputText)
-    allCorpus.append(currentSentences)
-corpusPicklePath = os.path.join(pickleDir, "corpus.pickle")
-corpusPickleFile = open(corpusPicklePath,"wb")
-pickle.dump(allCorpus, corpusPickleFile)
-
-testString = "this is a sentence"
-temp = ngrams(testString,2)
-print(temp)
-
-
-#readTemp = open(corpusPicklePath, "rb")
-#tempCorpus = pickle.load(readTemp)
-#print(tempCorpus)
