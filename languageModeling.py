@@ -31,25 +31,26 @@ def getText(filename):
 
 #ngrams function
 def ngrams(input, n):
-    input = input.split(' ')
-    output = {}
-    for i in range(len(input) - n + 1):
-        g = ' '.join(input[i:i+n])
-        output.setdefault(g, 0)
-        output[g] += 1
+    output = []
+    for eachDoc in input:
+        eachDocList=[]
+        for sentence in eachDoc:
+            text = sentence.split(' ')
+            for i in range(len(text) - n + 1):
+                g = ' '.join(text[i:i + n])
+                eachDocList.append(g)
+        output.append(eachDocList)
+    # input = input.split(' ')
+    # output = {}
+    # for i in range(len(input) - n + 1):
+    #     g = ' '.join(input[i:i+n])
+    #     output.setdefault(g, 0)
+    #     output[g] += 1
     return output
 
-#writes bigram, trigram and quadgram files to the directory
-def writeNGrams(corpus):
-    i = 2
-    #gets ngrams for austen-emma
-    while i < 5:
-        file = open(str(i) + "gram.txt", "wt")
-        temp = str(ngrams(str(corpus[0]), i))
-        file.write(temp)
-        file.close()
-        i += 1
-
+#create pickle
+def createPickel(data,fileName):
+    pickleDir = os.path.join(cwd, "_pickleFiles")
 
 #====================================================================================================
 #Main
@@ -79,8 +80,23 @@ readTemp = open(corpusPicklePath, "rb")
 tempCorpus = pickle.load(readTemp)
 readTemp.close()
 
-
-print(writeNGrams(tempCorpus))
+#creating n grams
+uniPicklePath = os.path.join(pickleDir, "unigram.pickle")
+biPicklePath = os.path.join(pickleDir, "bigram.pickle")
+triPicklePath = os.path.join(pickleDir, "trigram.pickle")
+quadPicklePath = os.path.join(pickleDir, "quadgram.pickle")
+uniPickleFile = open(uniPicklePath,"wb")
+biPickleFile = open(biPicklePath,"wb")
+triPickleFile = open(triPicklePath,"wb")
+quadPickleFile = open(quadPicklePath,"wb")
+unigram = ngrams(tempCorpus,1)
+bigram = ngrams(tempCorpus, 2)
+trigram= ngrams(tempCorpus, 3)
+quadgram = ngrams(tempCorpus, 4)
+pickle.dump(unigram, uniPickleFile)
+pickle.dump(bigram, biPickleFile)
+pickle.dump(trigram, triPickleFile)
+pickle.dump(quadgram, quadPickleFile)
 
 # testString = "this is a sentence"
 # temp = ngrams(testString,2)
