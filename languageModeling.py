@@ -33,24 +33,56 @@ def getText(filename):
 def ngrams(input, n):
     output = []
     for eachDoc in input:
-        eachDocList=[]
         for sentence in eachDoc:
             text = sentence.split(' ')
+            text.append("<NEWLINE>")
             for i in range(len(text) - n + 1):
                 g = ' '.join(text[i:i + n])
-                eachDocList.append(g)
-        output.append(eachDocList)
-    # input = input.split(' ')
-    # output = {}
-    # for i in range(len(input) - n + 1):
-    #     g = ' '.join(input[i:i+n])
-    #     output.setdefault(g, 0)
-    #     output[g] += 1
-    return output
+                output.append(g)
+    totalCount = len(output)
+    freqDistList = nltk.FreqDist(output)
+    newFreqDict = calculateProb(freqDistList,totalCount)
+    return newFreqDict
+
+#calculate probability of n-gram
+def calculateProb(freqDistList,totalCount):
+    finalDict={}
+    for items in freqDistList:
+        count = freqDistList[items]
+        probCount = count / totalCount
+        finalDict[items] = probCount
+    return finalDict
+
+#calculate highest probability
+def calHighestPossibility(userInput, ngramList):
+
+    finalList = []
+    for item in ngramList:
+        splitItem = item.split(' ')
+        for eachWord in splitItem:
+            if userInput == eachWord:
+                finalList.append((item,ngramList[item]))
+    sortedList = sorted(finalList, key=lambda tup: tup[1])
+    return sortedList[-1]
+
 
 #create pickle
-def createPickel(data,fileName):
+def createPickle(cwd,data,fileName):
     pickleDir = os.path.join(cwd, "_pickleFiles")
+    picklePath = os.path.join(pickleDir,fileName)
+    pickleFile = open(picklePath, "wb")
+    pickle.dump(data, pickleFile)
+    pickleFile.close()
+
+#read pickle
+def openPickleFile(cwd,fileName):
+    pickleDir = os.path.join(cwd, "_pickleFiles")
+    picklePath = os.path.join(pickleDir, fileName)
+    pickleFile =open(picklePath, "rb")
+    loadFile = pickle.load(pickleFile)
+    pickleFile.close()
+    return loadFile
+
 
 #====================================================================================================
 #Main
@@ -68,53 +100,51 @@ for eachFile in listOfInputName:
     currentSentences = preprocessing(currentInputText)
     allCorpus.append(currentSentences)
 
-
 #Serializing corpus
-corpusPicklePath = os.path.join(pickleDir, "corpus.pickle")
-corpusPickleFile = open(corpusPicklePath,"wb")
-pickle.dump(allCorpus, corpusPickleFile)
-corpusPickleFile.close()
+# createPickle(cwd,allCorpus,"corpus.pickle")
 
 #Deserializing corpus
-readTemp = open(corpusPicklePath, "rb")
-tempCorpus = pickle.load(readTemp)
-readTemp.close()
+tempCorpus = openPickleFile(cwd,"corpus.pickle")
 
-#creating n grams
-uniPicklePath = os.path.join(pickleDir, "unigram.pickle")
-biPicklePath = os.path.join(pickleDir, "bigram.pickle")
-triPicklePath = os.path.join(pickleDir, "trigram.pickle")
-quadPicklePath = os.path.join(pickleDir, "quadgram.pickle")
-uniPickleFile = open(uniPicklePath,"wb")
-biPickleFile = open(biPicklePath,"wb")
-triPickleFile = open(triPicklePath,"wb")
-quadPickleFile = open(quadPicklePath,"wb")
-unigram = ngrams(tempCorpus,1)
+
+#creating n grams and serializing
 bigram = ngrams(tempCorpus, 2)
 trigram= ngrams(tempCorpus, 3)
 quadgram = ngrams(tempCorpus, 4)
-pickle.dump(unigram, uniPickleFile)
-pickle.dump(bigram, biPickleFile)
-pickle.dump(trigram, triPickleFile)
-pickle.dump(quadgram, quadPickleFile)
 
-# testString = "this is a sentence"
+createPickle(cwd,bigram,"bigram.pickle")
+createPickle(cwd,bigram,"trigram.pickle")
+createPickle(cwd,bigram,"quadgram.pickle")
+
+bigramData = openPickleFile(cwd, "bigram.pickle")
+trigramData = openPickleFile(cwd, "trigram.pickle")
+quadgramData = openPickleFile(cwd, "quadgram.pickle")
+
+#userInput = input("Give me a query:")
+userInput = "to"
+userInput = userInput.lower()
+#eSwitch = True
+#while eSwitch:
+splitList = userInput.split(' ')
+if len(splitList) == 1:
+    calHighestPossibility(userInput, bigramData)
+    print('bi')
+elif len(splitList) == 2:
+    print('tri')
+elif len(splitList) == 3:
+    print('quad')
+else:
+    print('all')
+
+#if splitList[-1] == "<NEWLINE>":
+#   eSwitch = False
+
+
+
+# testString = "This is a sentence"
 # temp = ngrams(testString,2)
 # print(temp)
 
 
 ############# graveyard #####################
 
-
-# def g():
-#   global big
-#   big = file('big.txt').read()
-#   N = len(big)
-#   s = set()
-#   for i in xrange(6, N):
-#     c = big[i]
-#     if ord(c) > 127 and c not in s:
-#         print i, c, ord(c), big[max(0, i-10):min(N, i+10)]
-#         s.add(c)
-#   print s
-#   print [ord(c) for c in s]
