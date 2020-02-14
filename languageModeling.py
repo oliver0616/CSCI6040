@@ -134,7 +134,7 @@ trigramData = openPickleFile(cwd, "trigram.pickle")
 quadgramData = openPickleFile(cwd, "quadgram.pickle")
 
 #userInput = input("Give me a query:")
-userInput = "pleasure"
+userInput = "it hurts"
 userInput = userInput.lower()
 eSwitch = True
 finalSentence = userInput
@@ -143,28 +143,38 @@ while eSwitch:
     splitList = userInput.split(' ')
     if len(splitList) == 1:
         words,probValue = calHighestPossibility(userInput, bigramData)
-        userInput = words
-        wordsList = words.split(' ')
-        if wordsList[-1] == "<NONE>":
+        if words == "<NONE>":
             break
+        wordsList = words.split(' ')
+        userInput = words
         finalSentence = finalSentence +" "+ wordsList[-1]
         if wordsList[-1] == "<NEWLINE>":
             break
     elif len(splitList) == 2:
         words,probValue = calHighestPossibility(userInput, trigram)
-        userInput = words
+        if words == "<NONE>":
+            userInputList = userInput.split(' ')
+            userInput = ""
+            for each in userInputList[1:]:
+                userInput = userInput+" "+each
+            userInput = userInput.strip()
+            continue
         wordsList = words.split(' ')
-        if wordsList[-1] == "<NONE>":
-            break
+        userInput = words
         finalSentence = finalSentence +" "+wordsList[-1]
         if wordsList[-1] == "<NEWLINE>":
             break
     elif len(splitList) == 3:
         words,probValue = calHighestPossibility(userInput, quadgram)
-        userInput = words
+        if words == "<NONE>":
+            userInputList = userInput.split(' ')
+            userInput = ""
+            for each in userInputList[1:]:
+                userInput = userInput+" "+each
+            userInput = userInput.strip()
+            continue
         wordsList = words.split(' ')
-        if wordsList[-1] == "<NONE>":
-            break
+        userInput = words
         finalSentence = finalSentence +" "+ wordsList[-1]
         if wordsList[-1] == "<NEWLINE>":
             break
@@ -176,8 +186,7 @@ while eSwitch:
         userInput = userInput.strip()
 
     print(finalSentence)
-    #print(userInput)
-#print(finalSentence)
+
         
 
 #if splitList[-1] == "<NEWLINE>":
