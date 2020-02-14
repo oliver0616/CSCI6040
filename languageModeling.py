@@ -55,15 +55,28 @@ def calculateProb(freqDistList,totalCount):
 
 #calculate highest probability
 def calHighestPossibility(userInput, ngramList):
-
     finalList = []
     for item in ngramList:
-        splitItem = item.split(' ')
-        for eachWord in splitItem:
-            if userInput == eachWord:
+        sameWords = True
+        if userInput in item:
+            itemList = item.split(' ')
+            userInputList = userInput.split(' ')
+            ngramPointer = 0
+            for eachUserWord in userInputList:
+                if eachUserWord == itemList[ngramPointer]:
+                    ngramPointer+=1
+                else:
+                    sameWords = False
+                    break
+            if sameWords:
                 finalList.append((item,ngramList[item]))
     sortedList = sorted(finalList, key=lambda tup: tup[1])
-    return sortedList[-1]
+    if len(sortedList) == 1:
+        return sortedList[0]
+    elif not len(sortedList) == 0: 
+        return sortedList[-1]
+    else:
+        return ("<NONE>",0)
 
 
 #create pickle
@@ -101,7 +114,7 @@ for eachFile in listOfInputName:
     allCorpus.append(currentSentences)
 
 #Serializing corpus
-# createPickle(cwd,allCorpus,"corpus.pickle")
+#createPickle(cwd,allCorpus,"corpus.pickle")
 
 #Deserializing corpus
 tempCorpus = openPickleFile(cwd,"corpus.pickle")
@@ -112,29 +125,60 @@ bigram = ngrams(tempCorpus, 2)
 trigram= ngrams(tempCorpus, 3)
 quadgram = ngrams(tempCorpus, 4)
 
-createPickle(cwd,bigram,"bigram.pickle")
-createPickle(cwd,bigram,"trigram.pickle")
-createPickle(cwd,bigram,"quadgram.pickle")
+#createPickle(cwd,bigram,"bigram.pickle")
+#createPickle(cwd,bigram,"trigram.pickle")
+#createPickle(cwd,bigram,"quadgram.pickle")
 
 bigramData = openPickleFile(cwd, "bigram.pickle")
 trigramData = openPickleFile(cwd, "trigram.pickle")
 quadgramData = openPickleFile(cwd, "quadgram.pickle")
 
 #userInput = input("Give me a query:")
-userInput = "to"
+userInput = "pleasure"
 userInput = userInput.lower()
-#eSwitch = True
-#while eSwitch:
-splitList = userInput.split(' ')
-if len(splitList) == 1:
-    calHighestPossibility(userInput, bigramData)
-    print('bi')
-elif len(splitList) == 2:
-    print('tri')
-elif len(splitList) == 3:
-    print('quad')
-else:
-    print('all')
+eSwitch = True
+finalSentence = userInput
+
+while eSwitch:
+    splitList = userInput.split(' ')
+    if len(splitList) == 1:
+        words,probValue = calHighestPossibility(userInput, bigramData)
+        userInput = words
+        wordsList = words.split(' ')
+        if wordsList[-1] == "<NONE>":
+            break
+        finalSentence = finalSentence +" "+ wordsList[-1]
+        if wordsList[-1] == "<NEWLINE>":
+            break
+    elif len(splitList) == 2:
+        words,probValue = calHighestPossibility(userInput, trigram)
+        userInput = words
+        wordsList = words.split(' ')
+        if wordsList[-1] == "<NONE>":
+            break
+        finalSentence = finalSentence +" "+wordsList[-1]
+        if wordsList[-1] == "<NEWLINE>":
+            break
+    elif len(splitList) == 3:
+        words,probValue = calHighestPossibility(userInput, quadgram)
+        userInput = words
+        wordsList = words.split(' ')
+        if wordsList[-1] == "<NONE>":
+            break
+        finalSentence = finalSentence +" "+ wordsList[-1]
+        if wordsList[-1] == "<NEWLINE>":
+            break
+    else:
+        userInputList = userInput.split(' ')
+        userInput = ""
+        for each in userInputList[1:]:
+            userInput = userInput+" "+each
+        userInput = userInput.strip()
+
+    print(finalSentence)
+    #print(userInput)
+#print(finalSentence)
+        
 
 #if splitList[-1] == "<NEWLINE>":
 #   eSwitch = False
