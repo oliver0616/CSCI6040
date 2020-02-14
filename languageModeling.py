@@ -134,7 +134,7 @@ trigramData = openPickleFile(cwd, "trigram.pickle")
 quadgramData = openPickleFile(cwd, "quadgram.pickle")
 
 #userInput = input("Give me a query:")
-userInput = "it hurts"
+userInput = "this is the last one"
 userInput = userInput.lower()
 eSwitch = True
 finalSentence = userInput
